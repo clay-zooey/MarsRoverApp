@@ -20,17 +20,14 @@ object NetworkModule {
     fun provideOkHttpClient(): OkHttpClient {
         val builder = OkHttpClient.Builder()
             .addInterceptor { chain ->
-            val originalRequest = chain.request()
-            val request = if (BuildConfig.MARS_VISTA_API_KEY.isBlank()) {
-                originalRequest
-            } else {
-                originalRequest.newBuilder()
+                if (BuildConfig.MARS_VISTA_API_KEY.isBlank()) {
+                    throw MissingMarsVistaApiKeyException()
+                }
+                val request = chain.request().newBuilder()
                     .header("X-API-Key", BuildConfig.MARS_VISTA_API_KEY)
                     .build()
+                chain.proceed(request)
             }
-
-            chain.proceed(request)
-        }
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)

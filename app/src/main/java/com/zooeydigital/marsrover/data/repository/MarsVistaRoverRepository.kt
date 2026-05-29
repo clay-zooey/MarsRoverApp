@@ -1,7 +1,6 @@
 package com.zooeydigital.marsrover.data.repository
 
 import com.zooeydigital.marsrover.core.common.AppDispatchers
-import com.zooeydigital.marsrover.BuildConfig
 import com.zooeydigital.marsrover.data.marsvista.MarsVistaApi
 import com.zooeydigital.marsrover.data.marsvista.MarsVistaPhotoMapper
 import com.zooeydigital.marsrover.data.marsvista.MarsVistaRoverMapper
@@ -26,10 +25,6 @@ class MarsVistaRoverRepository @Inject constructor(
     private var cachedRovers: List<MarsRover>? = null
 
     override fun getRovers(): Flow<List<MarsRover>> = flow {
-        if (BuildConfig.MARS_VISTA_API_KEY.isBlank()) {
-            throw MissingMarsVistaApiKeyException()
-        }
-
         // TODO: Implement offline local data persistence using Room DB to cache rovers
         // Return cached metadata instantly to avoid redundant over-fetching
         cachedRovers?.let {
@@ -63,7 +58,3 @@ class MarsVistaRoverRepository @Inject constructor(
         emit(MarsVistaPhotoMapper.map(photos))
     }.flowOn(appDispatchers.io)
 }
-
-class MissingMarsVistaApiKeyException : IllegalStateException(
-    "Mars Vista API key is not configured yet.",
-)

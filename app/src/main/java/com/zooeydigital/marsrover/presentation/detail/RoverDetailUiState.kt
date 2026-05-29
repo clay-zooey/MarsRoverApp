@@ -1,5 +1,6 @@
 package com.zooeydigital.marsrover.presentation.detail
 
+import com.zooeydigital.marsrover.core.common.AppError
 import com.zooeydigital.marsrover.domain.model.MarsPhoto
 import com.zooeydigital.marsrover.domain.model.MarsRover
 
@@ -14,7 +15,7 @@ sealed interface PhotosState {
     object Empty : PhotosState
     sealed interface Error : PhotosState {
         object InvalidRover : Error
-        data class NetworkError(val message: String) : Error
+        data class StandardError(val error: AppError) : Error
     }
     data class Success(val photos: List<MarsPhoto>) : PhotosState
 }

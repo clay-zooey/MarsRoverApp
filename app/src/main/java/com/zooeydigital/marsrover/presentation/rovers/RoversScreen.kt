@@ -12,8 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import android.content.res.Configuration
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,6 +38,7 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zooeydigital.marsrover.R
+import com.zooeydigital.marsrover.core.common.resolveMessage
 import com.zooeydigital.marsrover.domain.model.MarsRover
 import com.zooeydigital.marsrover.domain.model.RoverCamera
 import com.zooeydigital.marsrover.ui.theme.MarsRoverTheme
@@ -52,7 +57,12 @@ fun RoversScreen(
     ) {
         when (uiState) {
             RoversUiState.Empty -> EmptyContent(onRetryClick)
-            is RoversUiState.Error -> ErrorContent(uiState.message, onRetryClick)
+            is RoversUiState.Error -> {
+                ErrorContent(
+                    message = uiState.error.resolveMessage(R.string.unable_to_load_rovers),
+                    onRetryClick = onRetryClick
+                )
+            }
             RoversUiState.Loading -> LoadingContent()
             is RoversUiState.Success -> RoverList(uiState.rovers, onRoverClick)
         }
@@ -137,7 +147,10 @@ private fun RoverList(
     rovers: List<MarsRover>,
     onRoverClick: (MarsRover) -> Unit,
 ) {
-    LazyColumn(
+    val columns = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) 2 else 1
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(columns),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 16.dp,
@@ -145,9 +158,10 @@ private fun RoverList(
             end = 16.dp,
             bottom = 24.dp,
         ),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             Header()
         }
         items(
