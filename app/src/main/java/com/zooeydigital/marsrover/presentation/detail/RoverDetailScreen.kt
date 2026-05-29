@@ -73,13 +73,25 @@ fun RoverDetailScreen(
         val datePickerDialog = android.app.DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                val formattedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                val formattedDate = String.format(java.util.Locale.US, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
                 onDateSelected(formattedDate)
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         )
+
+        rover?.let {
+            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+            // Max Date: Today's date on failure
+            try {
+                val maxMs = sdf.parse(it.maxDate)?.time ?: System.currentTimeMillis()
+                datePickerDialog.datePicker.maxDate = maxMs
+            } catch (_: Exception) {
+                datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
+            }
+        }
+
         datePickerDialog.show()
     }
 
