@@ -51,14 +51,15 @@ import java.util.Calendar
 
 @Composable
 fun RoverDetailScreen(
-    rover: MarsRover?,
-    uiState: RoverDetailUiState,
-    selectedDate: String,
+    state: RoverDetailScreenState,
     onDateSelected: (String) -> Unit,
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val rover = state.rover
+    val uiState = state.photosState
+    val selectedDate = state.selectedDate
 
     val onDateClick = {
         val calendar = Calendar.getInstance()
@@ -72,13 +73,25 @@ fun RoverDetailScreen(
         val datePickerDialog = android.app.DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                val formattedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                val formattedDate = String.format(java.util.Locale.US, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
                 onDateSelected(formattedDate)
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         )
+
+        rover?.let {
+            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+            // Max Date: Today's date on failure
+            try {
+                val maxMs = sdf.parse(it.maxDate)?.time ?: System.currentTimeMillis()
+                datePickerDialog.datePicker.maxDate = maxMs
+            } catch (_: Exception) {
+                datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
+            }
+        }
+
         datePickerDialog.show()
     }
 
@@ -118,22 +131,26 @@ fun RoverDetailScreen(
                 }
 
                 when (uiState) {
-                    RoverDetailUiState.Loading -> {
+                    PhotosState.Loading -> {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             DetailLoadingContent()
                         }
                     }
-                    is RoverDetailUiState.Error -> {
+                    is PhotosState.Error -> {
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            DetailErrorContent(uiState.message, onRetryClick)
+                            val message = when (uiState) {
+                                PhotosState.Error.InvalidRover -> stringResource(R.string.error_invalid_rover)
+                                is PhotosState.Error.NetworkError -> uiState.message
+                            }
+                            DetailErrorContent(message, onRetryClick)
                         }
                     }
-                    RoverDetailUiState.Empty -> {
+                    PhotosState.Empty -> {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             DetailEmptyContent()
                         }
                     }
-                    is RoverDetailUiState.Success -> {
+                    is PhotosState.Success -> {
                         items(uiState.photos, key = { it.id }) { photo ->
                             PhotoCard(photo = photo)
                         }
@@ -339,30 +356,29 @@ private fun formatToUiDate(apiDate: String): String {
 private fun RoverDetailScreenPreview() {
     MarsRoverTheme {
         RoverDetailScreen(
-            rover = MarsRover(
-                id = "curiosity",
-                name = "Curiosity",
-                landingDate = "2012-08-06",
-                launchDate = "2011-11-26",
-                totalPhotos = 695670,
-                cameras = listOf(
-                    RoverCamera("FHAZ", "Front Hazard Avoidance Camera")
+            state = RoverDetailScreenState(
+                rover = MarsRover(
+                    id = "curiosity",
+                    name = "Curiosity",
+                    landingDate = "2012-08-06",
+                    launchDate = "2011-11-26",
+                    totalPhotos = 695670,
+                    cameras = listOf(
+                        RoverCamera("FHAZ", "Front Hazard Avoidance Camera")
+                    ),
+                    maxDate = "2026-05-27",
                 ),
-                maxDate = "2026-05-27",
-            ),
-            uiState = RoverDetailUiState.Success(
-                photos = listOf(
-                    MarsPhoto(
-                        id = "1",
-                        imageUrl = "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/03921/opgs/edr/ncam/NLB_745585765EDR_F1031528NCAM00354M_.JPG",
-                        fullResUrl = "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/03921/opgs/edr/ncam/NLB_745585765EDR_F1031528NCAM00354M_.JPG"
+                selectedDate = "2023-08-17",
+                photosState = PhotosState.Success(
+                    photos = listOf(
+                        MarsPhoto(
+                            id = "1",
+                            imageUrl = "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/03921/opgs/edr/ncam/NLB_745585765EDR_F1031528NCAM00354M_.JPG",
+                            fullResUrl = "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/03921/opgs/edr/ncam/NLB_745585765EDR_F1031528NCAM00354M_.JPG"
+                        )
                     )
                 )
             ),
-//            uiState = RoverDetailUiState.Error(
-//                "No Details"
-//            ),
-            selectedDate = "2023-08-17",
             onDateSelected = {},
             onRetryClick = {}
         )

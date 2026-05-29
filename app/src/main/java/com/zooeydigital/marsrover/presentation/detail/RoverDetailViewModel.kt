@@ -3,7 +3,6 @@ package com.zooeydigital.marsrover.presentation.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.zooeydigital.marsrover.domain.model.MarsRover
 import com.zooeydigital.marsrover.domain.repository.MarsRoverRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.IOException
@@ -12,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -20,70 +20,76 @@ class RoverDetailViewModel @Inject constructor(
     private val repository: MarsRoverRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val _roverState = MutableStateFlow<MarsRover?>(null)
-    val roverState: StateFlow<MarsRover?> = _roverState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<RoverDetailUiState>(RoverDetailUiState.Loading)
-    val uiState: StateFlow<RoverDetailUiState> = _uiState.asStateFlow()
+    private val _screenState = MutableStateFlow(RoverDetailScreenState())
+    val screenState: StateFlow<RoverDetailScreenState> = _screenState.asStateFlow()
 
-    private val _selectedDate = MutableStateFlow("")
-    val selectedDate: StateFlow<String> = _selectedDate.asStateFlow()
-
-    private val roverId: String = checkNotNull(savedStateHandle["roverId"]) {
-        "roverId must be passed as an argument to RoverDetailScreen"
-    }
+    private val roverId: String = savedStateHandle.get<String>("roverId").orEmpty()
 
     init {
-        loadRoverDetails()
+        if (roverId.isEmpty()) {
+            _screenState.update {
+                it.copy(photosState = PhotosState.Error.InvalidRover)
+            }
+        } else {
+            loadRoverDetails()
+        }
     }
 
     private fun loadRoverDetails() {
         viewModelScope.launch {
-            _uiState.value = RoverDetailUiState.Loading
+            _screenState.update { it.copy(photosState = PhotosState.Loading) }
             repository.getRovers()
                 .catch { throwable ->
-                    _uiState.value = RoverDetailUiState.Error(throwable.toUiMessage())
+                    _screenState.update { it.copy(photosState = PhotosState.Error.NetworkError(throwable.toUiMessage())) }
                 }
                 .collect { rovers ->
                     val rover = rovers.firstOrNull { it.id == roverId }
                     if (rover != null) {
-                        _roverState.value = rover
-                        _selectedDate.value = rover.maxDate
+                        _screenState.update {
+                            it.copy(
+                                rover = rover,
+                                selectedDate = rover.maxDate,
+                                photosState = PhotosState.Loading
+                            )
+                        }
                         loadPhotos(rover.maxDate)
                     } else {
-                        _uiState.value = RoverDetailUiState.Error("Rover not found.")
+                        _screenState.update { it.copy(photosState = PhotosState.Error.NetworkError("Rover not found.")) }
                     }
                 }
         }
     }
 
     fun onDateSelected(date: String) {
-        _selectedDate.value = date
+        _screenState.update { it.copy(selectedDate = date, photosState = PhotosState.Loading) }
         loadPhotos(date)
     }
 
     fun onRetryClick() {
-        if (_roverState.value == null) {
+        val currentState = _screenState.value
+        if (currentState.rover == null) {
             loadRoverDetails()
         } else {
-            loadPhotos(_selectedDate.value)
+            loadPhotos(currentState.selectedDate)
         }
     }
 
     private fun loadPhotos(date: String) {
         if (roverId.isEmpty() || date.isEmpty()) return
         viewModelScope.launch {
-            _uiState.value = RoverDetailUiState.Loading
+            _screenState.update { it.copy(photosState = PhotosState.Loading) }
             repository.getPhotos(roverId, date)
                 .catch { throwable ->
-                    _uiState.value = RoverDetailUiState.Error(throwable.toUiMessage())
+                    _screenState.update { it.copy(photosState = PhotosState.Error.NetworkError(throwable.toUiMessage())) }
                 }
                 .collect { photos ->
-                    _uiState.value = if (photos.isEmpty()) {
-                        RoverDetailUiState.Empty
+                    val nextPhotosState = if (photos.isEmpty()) {
+                        PhotosState.Empty
                     } else {
-                        RoverDetailUiState.Success(photos)
+                        PhotosState.Success(photos)
                     }
+                    _screenState.update { it.copy(photosState = nextPhotosState) }
                 }
         }
     }
