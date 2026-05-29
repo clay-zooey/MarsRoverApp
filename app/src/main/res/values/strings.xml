@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">MarsRover</string>
+
+    <string name="nasa_label">NASA</string>
+    <string name="retry_label">Retry</string>
+    <string name="go_back">Go Back</string>
+
+    <string name="no_rovers_found">No rovers found</string>
+    <string name="no_rovers_found_desc">Mars Vista did not return any rover records.</string>
+    <string name="unable_to_load_rovers">Unable to load rovers</string>
+    <string name="nasa_mars_rovers_title">NASA Mars Rovers</string>
+    <string name="nasa_mars_rovers_subtitle">Browse images from NASA Mars Rovers</string>
+    <string name="rover_surface_image_description">%1$s Mars surface image</string>
+    <string name="rover_launch">Launch</string>
+    <string name="rover_landing">Landing</string>
+    <string name="rover_total_photos">Total Photos</string>
+    <string name="rover_cameras_available">Cameras Available</string>
+    <string name="view_images_cta">VIEW IMAGES</string>
+
+    <string name="date_input_label">Date</string>
+    <string name="select_date_label">Select Date</string>
+    <string name="mars_rover_photo_desc">Mars rover photo</string>
+    <string name="failed_to_load_photo">Failed to load photo</string>
+    <string name="no_photos_taken_title">No photos taken on this day</string>
+    <string name="no_photos_taken_desc">Try picking a different date.</string>
+    <string name="unable_to_load_photos">Unable to load photos</string>
+</resources>
