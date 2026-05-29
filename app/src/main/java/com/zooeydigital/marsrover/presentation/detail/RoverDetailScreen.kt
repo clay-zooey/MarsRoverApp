@@ -82,17 +82,6 @@ fun RoverDetailScreen(
             calendar.get(Calendar.DAY_OF_MONTH)
         )
 
-        rover?.let {
-            val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
-            // Max Date: Today's date on failure
-            try {
-                val maxMs = sdf.parse(it.maxDate)?.time ?: System.currentTimeMillis()
-                datePickerDialog.datePicker.maxDate = maxMs
-            } catch (_: Exception) {
-                datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
-            }
-        }
-
         datePickerDialog.show()
     }
 

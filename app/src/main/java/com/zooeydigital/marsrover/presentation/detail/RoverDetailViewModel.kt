@@ -48,14 +48,17 @@ class RoverDetailViewModel @Inject constructor(
                 .collect { rovers ->
                     val rover = rovers.firstOrNull { it.id == roverId }
                     if (rover != null) {
+                        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                            .format(java.util.Date())
+
                         _screenState.update {
                             it.copy(
                                 rover = rover,
-                                selectedDate = rover.maxDate,
+                                selectedDate = today,
                                 photosState = PhotosState.Loading
                             )
                         }
-                        loadPhotos(rover.maxDate)
+                        loadPhotos(today)
                     } else {
                         _screenState.update {
                             it.copy(photosState = PhotosState.Error.StandardError(AppError.Unknown("Rover not found.")))
