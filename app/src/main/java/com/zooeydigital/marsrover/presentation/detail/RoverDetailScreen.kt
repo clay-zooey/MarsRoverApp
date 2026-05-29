@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.ui.res.stringResource
 import com.zooeydigital.marsrover.R
+import com.zooeydigital.marsrover.core.common.resolveMessage
 import com.zooeydigital.marsrover.domain.model.MarsPhoto
 import com.zooeydigital.marsrover.domain.model.MarsRover
 import com.zooeydigital.marsrover.domain.model.RoverCamera
@@ -140,7 +141,7 @@ fun RoverDetailScreen(
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             val message = when (uiState) {
                                 PhotosState.Error.InvalidRover -> stringResource(R.string.error_invalid_rover)
-                                is PhotosState.Error.NetworkError -> uiState.message
+                                is PhotosState.Error.StandardError -> uiState.error.resolveMessage(R.string.unable_to_load_photos)
                             }
                             DetailErrorContent(message, onRetryClick)
                         }

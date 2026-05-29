@@ -34,6 +34,7 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zooeydigital.marsrover.R
+import com.zooeydigital.marsrover.core.common.resolveMessage
 import com.zooeydigital.marsrover.domain.model.MarsRover
 import com.zooeydigital.marsrover.domain.model.RoverCamera
 import com.zooeydigital.marsrover.ui.theme.MarsRoverTheme
@@ -52,7 +53,12 @@ fun RoversScreen(
     ) {
         when (uiState) {
             RoversUiState.Empty -> EmptyContent(onRetryClick)
-            is RoversUiState.Error -> ErrorContent(uiState.message, onRetryClick)
+            is RoversUiState.Error -> {
+                ErrorContent(
+                    message = uiState.error.resolveMessage(R.string.unable_to_load_rovers),
+                    onRetryClick = onRetryClick
+                )
+            }
             RoversUiState.Loading -> LoadingContent()
             is RoversUiState.Success -> RoverList(uiState.rovers, onRoverClick)
         }

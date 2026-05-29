@@ -3,9 +3,10 @@ package com.zooeydigital.marsrover.presentation.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.zooeydigital.marsrover.core.common.AppError
+import com.zooeydigital.marsrover.core.common.toAppError
 import com.zooeydigital.marsrover.domain.repository.MarsRoverRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 @HiltViewModel
 class RoverDetailViewModel @Inject constructor(
@@ -41,7 +41,9 @@ class RoverDetailViewModel @Inject constructor(
             _screenState.update { it.copy(photosState = PhotosState.Loading) }
             repository.getRovers()
                 .catch { throwable ->
-                    _screenState.update { it.copy(photosState = PhotosState.Error.NetworkError(throwable.toUiMessage())) }
+                    _screenState.update {
+                        it.copy(photosState = PhotosState.Error.StandardError(throwable.toAppError()))
+                    }
                 }
                 .collect { rovers ->
                     val rover = rovers.firstOrNull { it.id == roverId }
@@ -55,7 +57,9 @@ class RoverDetailViewModel @Inject constructor(
                         }
                         loadPhotos(rover.maxDate)
                     } else {
-                        _screenState.update { it.copy(photosState = PhotosState.Error.NetworkError("Rover not found.")) }
+                        _screenState.update {
+                            it.copy(photosState = PhotosState.Error.StandardError(AppError.Unknown("Rover not found.")))
+                        }
                     }
                 }
         }
@@ -81,7 +85,9 @@ class RoverDetailViewModel @Inject constructor(
             _screenState.update { it.copy(photosState = PhotosState.Loading) }
             repository.getPhotos(roverId, date)
                 .catch { throwable ->
-                    _screenState.update { it.copy(photosState = PhotosState.Error.NetworkError(throwable.toUiMessage())) }
+                    _screenState.update {
+                        it.copy(photosState = PhotosState.Error.StandardError(throwable.toAppError()))
+                    }
                 }
                 .collect { photos ->
                     val nextPhotosState = if (photos.isEmpty()) {
@@ -93,11 +99,4 @@ class RoverDetailViewModel @Inject constructor(
                 }
         }
     }
-
-    private fun Throwable.toUiMessage(): String =
-        when (this) {
-            is HttpException -> "Mars Vista is unavailable right now. Please try again."
-            is IOException -> "Check your internet connection and try again."
-            else -> "Unable to load Mars photos. Please try again."
-        }
 }
