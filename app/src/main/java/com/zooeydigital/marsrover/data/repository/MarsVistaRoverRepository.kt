@@ -53,8 +53,8 @@ class MarsVistaRoverRepository @Inject constructor(
         emit(roversWithCameras)
     }.flowOn(appDispatchers.io)
 
-    override fun getPhotos(roverId: String, date: String): Flow<List<MarsPhoto>> = flow {
-        val photos = api.getPhotosForDate(roverId = roverId, earthDate = date)
+    override fun getPhotos(roverId: String, date: String, page: Int): Flow<List<MarsPhoto>> = flow {
+        val photos = api.getPhotosForDate(roverId = roverId, earthDate = date, page = page)
         emit(MarsVistaPhotoMapper.map(photos))
     }.flowOn(appDispatchers.io)
 }

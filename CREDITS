@@ -1,0 +1,18 @@
+# Third-Party Library Credits
+
+The following third-party libraries and frameworks are utilized in the Mars Vista Rover App. We gratefully acknowledge the contributions of these open-source projects:
+
+## 1. Networking & Data Serialization
+* **Retrofit, OkHttp & Logging Interceptor** (by Square)
+  * HTTP client for the Mars Vista REST API.
+
+* **Gson** (by Google)
+  * JSON serialization and deserialization mapping responses to Kotlin DTO models.
+
+## 2. Image Loading
+* **Coil Compose** (by Coil Contributors)
+  * Asynchronous image loading, memory/disk caching, and responsive grid image rendering.
+
+## 3. Dependency Injection
+* **Hilt & Dagger** (by Google)
+  * Dependency injection framework.

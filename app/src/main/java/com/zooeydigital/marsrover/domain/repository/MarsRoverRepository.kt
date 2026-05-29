@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface MarsRoverRepository {
     fun getRovers(): Flow<List<MarsRover>>
-    fun getPhotos(roverId: String, date: String): Flow<List<MarsPhoto>>
+    fun getPhotos(roverId: String, date: String, page: Int = 1): Flow<List<MarsPhoto>>
 }
