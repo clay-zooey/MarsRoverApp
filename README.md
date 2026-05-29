@@ -1,21 +1,35 @@
-# Mars Rover App
+# Mars Vista Rover App
 
-Android take-home app for browsing Mars Rover photos from the Mars Vista API.
+An Android application built with Jetpack Compose, Kotlin Coroutines, Retrofit, and Hilt for browsing Mars Rover photographs via the Mars Vista API.
 
-## API Key
+## Features & Optimizations
 
-Keep the Mars Vista API key out of Git by adding it to the project root `local.properties` file:
+* **Paginated Photo Loading (Infinite Scroll)**: Defaults to today's date and fetches photographs dynamically in pages of 50 as the user scrolls.
+* **Unified Error Handling**: Exception handling is decoupled into a clean `AppError` sealed model that resolves dynamically to localized strings inside Composables.
+* **API Key Interceptor**: Validates key existence centrally in an OkHttp Interceptor.
+* **Responsive Column Layout**: The Rovers list grid automatically adapts to **1 column in portrait** and **2 columns in landscape**.
+
+---
+
+## Configuration
+
+Add your Mars Vista API key to the project root `local.properties` file (ignored by Git):
 
 ```properties
-MARS_VISTA_API_KEY=mv_live_your_key_here
+MARS_VISTA_API_KEY=your_api_key_here
 ```
 
-`local.properties` is ignored by Git. Gradle exposes this value to app code through `BuildConfig.MARS_VISTA_API_KEY`. The Mars Vista base URL is also generated as `BuildConfig.MARS_VISTA_BASE_URL`.
+---
 
-If the value is missing, the app builds successfully but the rover screen shows a retryable configuration error instead of making an unauthenticated request.
+## Commands
 
-## Build
-
+### Build Application
 ```bash
 ./gradlew assembleDebug
+```
+
+### Run Unit Tests
+To execute the repository caching, exception mapping, and image-fallback test suites:
+```bash
+./gradlew testDebugUnitTest
 ```

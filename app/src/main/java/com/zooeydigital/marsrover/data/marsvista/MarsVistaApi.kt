@@ -17,6 +17,7 @@ interface MarsVistaApi {
     suspend fun getPhotosForDate(
         @Query("rovers") roverId: String,
         @Query("earth_date") earthDate: String,
-        @Query("per_page") perPage: Int = 100,
+        @Query("per_page") perPage: Int = 50,
+        @Query("page") page: Int = 1,
     ): MarsVistaPhotosResponse
 }

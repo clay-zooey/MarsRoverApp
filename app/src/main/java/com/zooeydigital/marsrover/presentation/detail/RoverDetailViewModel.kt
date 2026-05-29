@@ -69,7 +69,6 @@ class RoverDetailViewModel @Inject constructor(
     }
 
     fun onDateSelected(date: String) {
-        _screenState.update { it.copy(selectedDate = date, photosState = PhotosState.Loading) }
         loadPhotos(date)
     }
 
@@ -85,8 +84,16 @@ class RoverDetailViewModel @Inject constructor(
     private fun loadPhotos(date: String) {
         if (roverId.isEmpty() || date.isEmpty()) return
         viewModelScope.launch {
-            _screenState.update { it.copy(photosState = PhotosState.Loading) }
-            repository.getPhotos(roverId, date)
+            _screenState.update {
+                it.copy(
+                    selectedDate = date,
+                    photosState = PhotosState.Loading,
+                    currentPage = 1,
+                    isLastPageReached = false,
+                    isPaginationLoading = false
+                )
+            }
+            repository.getPhotos(roverId = roverId, date = date, page = 1)
                 .catch { throwable ->
                     _screenState.update {
                         it.copy(photosState = PhotosState.Error.StandardError(throwable.toAppError()))
@@ -98,8 +105,49 @@ class RoverDetailViewModel @Inject constructor(
                     } else {
                         PhotosState.Success(photos)
                     }
-                    _screenState.update { it.copy(photosState = nextPhotosState) }
+                    _screenState.update {
+                        it.copy(
+                            photosState = nextPhotosState,
+                            isLastPageReached = photos.size < PAGE_SIZE
+                        )
+                    }
                 }
         }
+    }
+
+    fun loadNextPage() {
+        val currentState = _screenState.value
+        if (roverId.isEmpty() ||
+            currentState.selectedDate.isEmpty() ||
+            currentState.isPaginationLoading ||
+            currentState.isLastPageReached ||
+            currentState.photosState !is PhotosState.Success) {
+            return
+        }
+
+        viewModelScope.launch {
+            _screenState.update { it.copy(isPaginationLoading = true) }
+            val nextPage = currentState.currentPage + 1
+            repository.getPhotos(roverId = roverId, date = currentState.selectedDate, page = nextPage)
+                .catch { throwable ->
+                    _screenState.update { it.copy(isPaginationLoading = false) }
+                }
+                .collect { newPhotos ->
+                    _screenState.update { state ->
+                        val currentPhotosList = (state.photosState as? PhotosState.Success)?.photos.orEmpty()
+                        val updatedPhotos = currentPhotosList + newPhotos
+                        state.copy(
+                            photosState = PhotosState.Success(updatedPhotos),
+                            currentPage = nextPage,
+                            isPaginationLoading = false,
+                            isLastPageReached = newPhotos.size < PAGE_SIZE
+                        )
+                    }
+                }
+        }
+    }
+
+    companion object {
+        private const val PAGE_SIZE = 50
     }
 }

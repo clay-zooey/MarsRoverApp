@@ -31,6 +31,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.background
@@ -55,12 +59,30 @@ fun RoverDetailScreen(
     state: RoverDetailScreenState,
     onDateSelected: (String) -> Unit,
     onRetryClick: () -> Unit,
+    onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val rover = state.rover
     val uiState = state.photosState
     val selectedDate = state.selectedDate
+
+    val gridState = rememberLazyGridState()
+
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            val lastVisibleItem = gridState.layoutInfo.visibleItemsInfo.lastOrNull()
+                ?: return@derivedStateOf false
+            
+            lastVisibleItem.index >= gridState.layoutInfo.totalItemsCount - 10
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore.value) {
+        if (shouldLoadMore.value) {
+            onLoadMore()
+        }
+    }
 
     val onDateClick = {
         val calendar = Calendar.getInstance()
@@ -101,6 +123,7 @@ fun RoverDetailScreen(
             }
         } else {
             LazyVerticalGrid(
+                state = gridState,
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
@@ -143,6 +166,22 @@ fun RoverDetailScreen(
                     is PhotosState.Success -> {
                         items(uiState.photos, key = { it.id }) { photo ->
                             PhotoCard(photo = photo)
+                        }
+                    }
+                }
+
+                if (state.isPaginationLoading) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(32.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 }
@@ -370,7 +409,8 @@ private fun RoverDetailScreenPreview() {
                 )
             ),
             onDateSelected = {},
-            onRetryClick = {}
+            onRetryClick = {},
+            onLoadMore = {}
         )
     }
 }

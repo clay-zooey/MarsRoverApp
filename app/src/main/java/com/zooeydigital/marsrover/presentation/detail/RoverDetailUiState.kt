@@ -7,7 +7,10 @@ import com.zooeydigital.marsrover.domain.model.MarsRover
 data class RoverDetailScreenState(
     val rover: MarsRover? = null,
     val selectedDate: String = "",
-    val photosState: PhotosState = PhotosState.Loading
+    val photosState: PhotosState = PhotosState.Loading,
+    val currentPage: Int = 1,
+    val isLastPageReached: Boolean = false,
+    val isPaginationLoading: Boolean = false
 )
 
 sealed interface PhotosState {

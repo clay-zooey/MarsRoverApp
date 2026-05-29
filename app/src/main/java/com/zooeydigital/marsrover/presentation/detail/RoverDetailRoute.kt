@@ -15,5 +15,6 @@ fun RoverDetailRoute(
         state = state,
         onDateSelected = viewModel::onDateSelected,
         onRetryClick = viewModel::onRetryClick,
+        onLoadMore = viewModel::loadNextPage,
     )
 }
