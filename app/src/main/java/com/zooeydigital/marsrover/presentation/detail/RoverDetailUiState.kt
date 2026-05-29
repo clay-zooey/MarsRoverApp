@@ -1,10 +1,20 @@
 package com.zooeydigital.marsrover.presentation.detail
 
 import com.zooeydigital.marsrover.domain.model.MarsPhoto
+import com.zooeydigital.marsrover.domain.model.MarsRover
 
-sealed interface RoverDetailUiState {
-    object Loading : RoverDetailUiState
-    object Empty : RoverDetailUiState
-    data class Error(val message: String) : RoverDetailUiState
-    data class Success(val photos: List<MarsPhoto>) : RoverDetailUiState
+data class RoverDetailScreenState(
+    val rover: MarsRover? = null,
+    val selectedDate: String = "",
+    val photosState: PhotosState = PhotosState.Loading
+)
+
+sealed interface PhotosState {
+    object Loading : PhotosState
+    object Empty : PhotosState
+    sealed interface Error : PhotosState {
+        object InvalidRover : Error
+        data class NetworkError(val message: String) : Error
+    }
+    data class Success(val photos: List<MarsPhoto>) : PhotosState
 }

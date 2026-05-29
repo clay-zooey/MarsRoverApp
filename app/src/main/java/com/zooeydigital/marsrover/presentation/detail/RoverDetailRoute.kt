@@ -9,14 +9,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun RoverDetailRoute(
     viewModel: RoverDetailViewModel = hiltViewModel(),
 ) {
-    val roverState by viewModel.roverState.collectAsStateWithLifecycle()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
+    val state by viewModel.screenState.collectAsStateWithLifecycle()
 
     RoverDetailScreen(
-        rover = roverState,
-        uiState = uiState,
-        selectedDate = selectedDate,
+        state = state,
         onDateSelected = viewModel::onDateSelected,
         onRetryClick = viewModel::onRetryClick,
     )
