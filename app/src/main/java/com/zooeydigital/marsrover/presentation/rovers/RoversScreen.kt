@@ -38,7 +38,7 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zooeydigital.marsrover.R
-import com.zooeydigital.marsrover.core.common.resolveMessage
+import com.zooeydigital.marsrover.presentation.common.resolveMessage
 import com.zooeydigital.marsrover.domain.model.MarsRover
 import com.zooeydigital.marsrover.domain.model.RoverCamera
 import com.zooeydigital.marsrover.ui.theme.MarsRoverTheme

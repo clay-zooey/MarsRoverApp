@@ -13,6 +13,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindMarsRoverRepository(
-        repository: MarsVistaRoverRepository,
+        repository: MarsRoverRepositoryImpl,
     ): MarsRoverRepository
 }

@@ -1,4 +1,4 @@
-package com.zooeydigital.marsrover.core.common
+package com.zooeydigital.marsrover.core.dispatchers
 
 import dagger.Module
 import dagger.Provides
