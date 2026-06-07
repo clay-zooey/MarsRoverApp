@@ -1,4 +1,4 @@
-package com.zooeydigital.marsrover.core.common
+package com.zooeydigital.marsrover.core.dispatchers
 
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

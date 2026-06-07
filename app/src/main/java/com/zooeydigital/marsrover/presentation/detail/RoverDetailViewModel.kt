@@ -3,9 +3,10 @@ package com.zooeydigital.marsrover.presentation.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.zooeydigital.marsrover.core.common.AppError
-import com.zooeydigital.marsrover.core.common.toAppError
-import com.zooeydigital.marsrover.domain.repository.MarsRoverRepository
+import com.zooeydigital.marsrover.domain.model.AppError
+import com.zooeydigital.marsrover.domain.model.toAppError
+import com.zooeydigital.marsrover.domain.usecase.GetMarsPhotosUseCase
+import com.zooeydigital.marsrover.domain.usecase.GetMarsRoversUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class RoverDetailViewModel @Inject constructor(
-    private val repository: MarsRoverRepository,
+    private val getMarsRovers: GetMarsRoversUseCase,
+    private val getMarsPhotos: GetMarsPhotosUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -39,7 +41,7 @@ class RoverDetailViewModel @Inject constructor(
     private fun loadRoverDetails() {
         viewModelScope.launch {
             _screenState.update { it.copy(photosState = PhotosState.Loading) }
-            repository.getRovers()
+            getMarsRovers()
                 .catch { throwable ->
                     _screenState.update {
                         it.copy(photosState = PhotosState.Error.StandardError(throwable.toAppError()))
@@ -93,7 +95,7 @@ class RoverDetailViewModel @Inject constructor(
                     isPaginationLoading = false
                 )
             }
-            repository.getPhotos(roverId = roverId, date = date, page = 1)
+            getMarsPhotos(roverId = roverId, date = date, page = 1)
                 .catch { throwable ->
                     _screenState.update {
                         it.copy(photosState = PhotosState.Error.StandardError(throwable.toAppError()))
@@ -128,7 +130,7 @@ class RoverDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _screenState.update { it.copy(isPaginationLoading = true) }
             val nextPage = currentState.currentPage + 1
-            repository.getPhotos(roverId = roverId, date = currentState.selectedDate, page = nextPage)
+            getMarsPhotos(roverId = roverId, date = currentState.selectedDate, page = nextPage)
                 .catch { throwable ->
                     _screenState.update { it.copy(isPaginationLoading = false) }
                 }

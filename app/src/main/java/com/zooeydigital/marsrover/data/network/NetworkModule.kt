@@ -1,4 +1,4 @@
-package com.zooeydigital.marsrover.core.network
+package com.zooeydigital.marsrover.data.network
 
 import com.zooeydigital.marsrover.BuildConfig
 import dagger.Module

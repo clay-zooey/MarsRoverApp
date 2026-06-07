@@ -1,6 +1,6 @@
-package com.zooeydigital.marsrover.core.common
+package com.zooeydigital.marsrover.domain.model
 
-import com.zooeydigital.marsrover.core.network.MissingMarsVistaApiKeyException
+import com.zooeydigital.marsrover.data.network.MissingMarsVistaApiKeyException
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.UnknownHostException

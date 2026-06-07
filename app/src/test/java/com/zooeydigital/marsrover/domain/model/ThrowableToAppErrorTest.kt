@@ -1,6 +1,6 @@
-package com.zooeydigital.marsrover.core.common
+package com.zooeydigital.marsrover.domain.model
 
-import com.zooeydigital.marsrover.core.network.MissingMarsVistaApiKeyException
+import com.zooeydigital.marsrover.data.network.MissingMarsVistaApiKeyException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

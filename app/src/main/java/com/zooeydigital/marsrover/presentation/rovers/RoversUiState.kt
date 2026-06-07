@@ -1,6 +1,6 @@
 package com.zooeydigital.marsrover.presentation.rovers
 
-import com.zooeydigital.marsrover.core.common.AppError
+import com.zooeydigital.marsrover.domain.model.AppError
 import com.zooeydigital.marsrover.domain.model.MarsRover
 
 sealed interface RoversUiState {

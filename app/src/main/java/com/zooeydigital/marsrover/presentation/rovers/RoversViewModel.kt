@@ -2,7 +2,7 @@ package com.zooeydigital.marsrover.presentation.rovers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zooeydigital.marsrover.core.common.toAppError
+import com.zooeydigital.marsrover.domain.model.toAppError
 import com.zooeydigital.marsrover.domain.usecase.GetMarsRoversUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

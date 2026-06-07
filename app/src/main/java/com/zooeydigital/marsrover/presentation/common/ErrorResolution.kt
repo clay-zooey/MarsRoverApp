@@ -1,8 +1,9 @@
-package com.zooeydigital.marsrover.core.common
+package com.zooeydigital.marsrover.presentation.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.zooeydigital.marsrover.R
+import com.zooeydigital.marsrover.domain.model.AppError
 
 @Composable
 fun AppError.resolveMessage(fallbackResId: Int): String {

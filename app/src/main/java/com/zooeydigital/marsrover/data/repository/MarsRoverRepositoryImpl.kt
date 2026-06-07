@@ -1,6 +1,6 @@
 package com.zooeydigital.marsrover.data.repository
 
-import com.zooeydigital.marsrover.core.common.AppDispatchers
+import com.zooeydigital.marsrover.core.dispatchers.AppDispatchers
 import com.zooeydigital.marsrover.data.marsvista.MarsVistaApi
 import com.zooeydigital.marsrover.data.marsvista.MarsVistaPhotoMapper
 import com.zooeydigital.marsrover.data.marsvista.MarsVistaRoverMapper
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 @Singleton
-class MarsVistaRoverRepository @Inject constructor(
+class MarsRoverRepositoryImpl @Inject constructor(
     private val api: MarsVistaApi,
     private val appDispatchers: AppDispatchers,
 ) : MarsRoverRepository {

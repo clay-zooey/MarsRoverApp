@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.ui.res.stringResource
 import com.zooeydigital.marsrover.R
-import com.zooeydigital.marsrover.core.common.resolveMessage
+import com.zooeydigital.marsrover.presentation.common.resolveMessage
 import com.zooeydigital.marsrover.domain.model.MarsPhoto
 import com.zooeydigital.marsrover.domain.model.MarsRover
 import com.zooeydigital.marsrover.domain.model.RoverCamera
