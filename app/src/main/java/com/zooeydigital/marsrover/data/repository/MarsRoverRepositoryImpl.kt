@@ -15,6 +15,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Singleton
 class MarsRoverRepositoryImpl @Inject constructor(
@@ -22,35 +24,41 @@ class MarsRoverRepositoryImpl @Inject constructor(
     private val appDispatchers: AppDispatchers,
 ) : MarsRoverRepository {
     // Thread-safe in-memory cache for static rover metadata
+    @Volatile
     private var cachedRovers: List<MarsRover>? = null
+    private val mutex = Mutex()
 
     override fun getRovers(): Flow<List<MarsRover>> = flow {
-        // TODO: Implement offline local data persistence using Room DB to cache rovers
         // Return cached metadata instantly to avoid redundant over-fetching
-        cachedRovers?.let {
-            emit(it)
+        val cached = cachedRovers
+        if (cached != null) {
+            emit(cached)
             return@flow
         }
 
-        val rovers = MarsVistaRoverMapper.map(api.getRovers())
-        val roversWithCameras = coroutineScope {
-            rovers.map { rover ->
-                async {
-                    val fullRover = runCatching {
-                        api.getRover(rover.id).data
-                    }.getOrNull()
+        val result = mutex.withLock {
+            cachedRovers ?: run {
+                val rovers = MarsVistaRoverMapper.map(api.getRovers())
+                val roversWithCameras = coroutineScope {
+                    rovers.map { rover ->
+                        async {
+                            val fullRover = runCatching {
+                                api.getRover(rover.id).data
+                            }.getOrNull()
 
-                    val mappedRover = fullRover?.let {
-                        MarsVistaRoverMapper.mapSingle(it)
-                    } ?: rover
+                            val mappedRover = fullRover?.let {
+                                MarsVistaRoverMapper.mapSingle(it)
+                            } ?: rover
 
-                    mappedRover
+                            mappedRover
+                        }
+                    }.awaitAll()
                 }
-            }.awaitAll()
+                cachedRovers = roversWithCameras
+                roversWithCameras
+            }
         }
-
-        cachedRovers = roversWithCameras
-        emit(roversWithCameras)
+        emit(result)
     }.flowOn(appDispatchers.io)
 
     override fun getPhotos(roverId: String, date: String, page: Int): Flow<List<MarsPhoto>> = flow {
