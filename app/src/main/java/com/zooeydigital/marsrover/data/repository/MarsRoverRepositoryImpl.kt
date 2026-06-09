@@ -30,9 +30,8 @@ class MarsRoverRepositoryImpl @Inject constructor(
 
     override fun getRovers(): Flow<List<MarsRover>> = flow {
         // Return cached metadata instantly to avoid redundant over-fetching
-        val cached = cachedRovers
-        if (cached != null) {
-            emit(cached)
+        cachedRovers?.let {
+            emit(it)
             return@flow
         }
 
